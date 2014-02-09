@@ -32,7 +32,6 @@ module Bootstrap3
     end
 
     def datetimepicker(field, opts = {})
-      @field = field
       html = text_field field, merge_opts(opts, class: :datetimepicker)
       opts = merge_opts(opts,
         input_group: { class: :datetimepicker },
@@ -41,7 +40,9 @@ module Bootstrap3
         class: :date
      )
      input_wrapping(html, opts)
-    end
+    endo
+      
+    private
 
     def input_wrapping(html, opts = {})
       html = input_group_wrapping(html, opts)
