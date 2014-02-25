@@ -9,7 +9,7 @@ module Bootstrap3
       define_method method_name do |field, opts = {}|
         opts = merge_opts(opts, input_group: true) if opts[:addon]
         html = super(field, merge_opts(opts,
-          placeholder: object.class.human_attribute_name(field),
+          placeholder: object.class.try(:human_attribute_name, field),
           class: 'form-control'
         ))
         input_wrapping html, opts
@@ -18,31 +18,30 @@ module Bootstrap3
 
     def select(field, choices, opts = {}, html_opts = {})
       html = super field, choices, merge_opts(opts,
-        group: true,
+        input_group: true,
         include_blank: object.class.human_attribute_name(field)
       ), merge_opts(html_opts, class: 'form-control')
       input_wrapping html, opts
     end
 
     def datepicker(field, opts = {})
-      html = @template.content_tag(:div, class: 'form-group') do
-        text_field field, opts.merge(class: :datepicker, addon: :calendar)
-      end
-      input_wrapping html, opts
+      html = text_field field
+      input_wrapping html, merge_opts(opts,
+        input_group: { class: 'datepicker date' },
+        addon: ['#', :remove, :calendar],
+        class: :date
+      )
     end
 
     def datetimepicker(field, opts = {})
-      html = text_field field, merge_opts(opts, class: :datetimepicker)
+      html = text_field field
       opts = merge_opts(opts,
-        input_group: { class: :datetimepicker },
-        addon: { before: { icon_name: :calendar, class: :datepickerbutton },
-                 after:  { icon_name: :remove, class: :date_remove } },
+        input_group: { class: 'datetimepicker date' },
+        addon: ['#', :remove, :calendar],
         class: :date
      )
      input_wrapping(html, opts)
-    endo
-      
-    private
+    end
 
     def input_wrapping(html, opts = {})
       html = input_group_wrapping(html, opts)
@@ -62,9 +61,8 @@ module Bootstrap3
         input_group_addon(opts[:before]) + html + input_group_addon(opts[:after])
       when Array
         opts.map do |icon_name|
-          icon_name.to_s == '#' ? html :
-            input_group_addon(icon_name)
-        end
+          icon_name.to_s == '#' ? html : input_group_addon(icon_name)
+        end.reduce(:+)
       else
         html
       end
